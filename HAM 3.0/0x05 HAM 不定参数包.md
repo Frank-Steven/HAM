@@ -12,7 +12,7 @@ f = ...x => g(x...)
 
 ## `x....` `....x`
 ```HAM
-f = x.... => g(x....)
+f = ....x => g(x....)
 ```
 
 这将捕获这次调用的所有括号及其参数。
@@ -21,13 +21,13 @@ f = x.... => g(x....)
 
 ```HAM
 getArgc = ...Args => {
-  #curArgc <- (arg, ...curArgs) => #curArgs(curArgs...) + 1;
-  argc = #curArgc(Args...);
+  #curArgc <- (arg, ...curArgs) => #curArgc(curArgs...) + 1,
+  argc = #curArgc(Args...)
 },
 
 getAllArgc = ....Args => {
-  #curArgc <- (arg, ....curArgs) => #curArgc(curArgs....) + 1;
-  allArgc = #curArgc(Args....);
+  #curArgc <- (arg, ....curArgs) => #curArgc(curArgs....) + 1,
+  allArgc = #curArgc(Args....)
 },
 
 f = getArgc <| getAllArgc <| ....args => .argc % 3 + .allArgc % 3
