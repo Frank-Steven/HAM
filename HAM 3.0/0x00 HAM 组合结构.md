@@ -104,7 +104,7 @@ comb.{a, b} = comb1
 此外，组合的扩展也可以使用一种算符 `<|` （Δ 算符），上述组合扩展可以写为
 
 ```HAM
-comb = comb1 <| comb
+comb = comb <| comb1 // { a = 3, b = 4 }
 ```
 
 > 提示：用顺序匹配键的方式理解这种表达法，优先匹配 comb1 中的键
@@ -113,6 +113,6 @@ comb = comb1 <| comb
 
 ```HAM
 comb2 = { a = 1, c = 2 },
-comb1 = comb2 <| comb1      // { a = 1, b = 4, c = 2 }
+comb1 = comb1 <| comb2      // { a = 1, b = 4, c = 2 }
 ```
 

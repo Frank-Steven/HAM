@@ -15,18 +15,18 @@ f = ...x => g(x...)
 f = ....x => g(x....)
 ```
 
-这将捕获这次调用的所有括号及其参数。
+这将捕获这次调用的所有括号的剩余参数。
 
 ## 不定参数包可用于扩展函数功能
 
 ```HAM
 getArgc = ...Args => {
-  #curArgc <- (arg, ...curArgs) => #curArgc(curArgs...) + 1,
+  #curArgc <- 0 <| (arg, ...curArgs) => #curArgc(curArgs...) + 1,
   argc = #curArgc(Args...)
 },
 
 getAllArgc = ....Args => {
-  #curArgc <- (arg, ....curArgs) => #curArgc(curArgs....) + 1,
+  #curArgc <- 0 <| (arg, ....curArgs) => #curArgc(curArgs....) + 1,
   allArgc = #curArgc(Args....)
 },
 
