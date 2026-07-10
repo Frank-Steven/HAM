@@ -3,8 +3,8 @@
 if 表达式可以帮助我们简单地创建分段函数（分支结构），其形式如下
 
 ```HAM
-a = if cond 100            // 100（cond 为 true）/ {}（cond 为 false）
-b = if cond 100 else 10    // 100（cond 为 true）/ 10（cond 为 false）
+a = if (cond) 100            // 100（cond 为 true）/ {}（cond 为 false）
+b = if (cond) 100 else 10    // 100（cond 为 true）/ 10（cond 为 false）
 ```
 
 if 表达式应该视为一种分段函数的简化写法
