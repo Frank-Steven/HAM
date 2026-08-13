@@ -1,12 +1,14 @@
 # 0x03 HAM Something
 
-HAM 中的所有表达式类型现在你已经全部见过了，在 HAM 中，这些东西共同属于集合 Anything（或 Any），它包含了你在 HAM 中能见到的一切合法的表达式。
+HAM 中的所有表达式类型现在你已经全部见过了，在 HAM 中，这些东西共同属于集合 `Anything`（或 `Any`），它包含了你在 HAM 中能见到的一切合法的表达式。
 
-除了 Anything 之外，本节将重点介绍构成它的两个子集：Something（或 Sth）和 Nothing。
+除了 `Anything` 之外，本节将重点介绍构成它的两个子集：`Something`（或 `Sth`）和 `Nothing`。
+
+注：本节中，被代码块包裹的 `Something` 和 `Nothing` 是集合的名字，而未被代码块包裹的 "Something" 是表达式的名字。
 
 ## Nothing
 
-Nothing 是一个仅含 `{}`（空组合）的集合，空组合既不能参与运算，又不能被调用，是 HAM 里看似最没用的存在。
+`Nothing` 是一个仅含 `{}`（空组合）的集合，空组合既不能参与运算，又不能被调用，是 HAM 里看似最没用的存在。
 
 然而，空组合的存在让 HAM 可以在函数调用不合法时返回一个空组合，表示“没有值”，而不是抛出异常。
 
@@ -16,7 +18,7 @@ Nothing 是一个仅含 `{}`（空组合）的集合，空组合既不能参与�
 
 ## Something
 
-Something 是 Anything 去掉 `{}` 的集合，它表示一个可以被使用的东西，可以参与运算，可以被调用。
+`Something` 是 `Anything` 去掉 `{}` 的集合。Something 表示一个可以被使用的东西，可以参与运算，可以被调用。
 
 Something 都满足以下标准式
 
