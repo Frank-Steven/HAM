@@ -65,7 +65,7 @@ LessThan3 = { 0, 1, 2 }
 ```HAM
 Even = {...| x: Int => x % 2 == 0 }
 Odd = {...|_ % 2 == 1 } // 用 `_` 语法糖简化单参函数
-FirstQuadrant = {...| (x: Num, y: Num) => x > 0 && y > 0 }
+FirstQuadrant = {...| (e: {x: Num, y: Num}) => e.x > 0 && e.y > 0 }
 ```
 
 `...|` 后的函数必须是一个返回 `Bool` 的单参函数，具体而言，该函数属于 `Anything -> Bool`。任何表达式 `x` 属于集合 `{...| f}`，当且仅当 `f(x)` 为 `true`。
@@ -86,7 +86,7 @@ comb in { x: Int }                 // true
 
 `in` 运算符的优先级低于 `<|` 运算符。
 
-> 提示：`x in A` 可以理解为，把 `x` 用在任何需要 `A` 中元素的位置都不会有问题、能满足要求。
+> 提示：`x in A` 可以理解为，把 `x` 用在任何需要 `A` 中元素的位置都不会有问题、能满足要求。具体规则见 `<~` 运算符的说明。
 
 `notin` 运算符是 `in` 运算符的否定，`x notin A` 等价于 `!(x in A)`：
 
@@ -126,27 +126,60 @@ NumDeltaFii = Num <~ (Int -> Int)
 1 <| (x: Int) => x + 1 in NumDeltaFii // true
 1 <| (x: Int) => "abc" in NumDeltaFii // false
 
-SomeSet1 = { 1, 2, 3 } <~ { 2, 3, 4 } // { 2, 3, 4 }
-SomeSet2 = { x: Int, y: Int } <~ { x: Float, z: Float } // { x: Float, y: Int, z: Float }
+FiiDeltaNum = (Int -> Int) <~ Num
+1 <| (x: Int) => x + 1 in FiiDeltaNum // false
+(x: Int) => x + 1 <| 1 in FiiDeltaNum // true
 ```
 
 注意与 `<|` 运算符的区别，`<~` 运算符是集合的扩展运算符，而 `<|` 运算符是表达式的扩展运算符。集合在表达式中作为值存在，所以会遵循覆写原则：
 
 ```HAM
+SomeSet1 = { 1, 2, 3 } <~ { 2, 3, 4 } // { 2, 3, 4 }
+SomeSet2 = { x: Int, y: Int } <~ { x: Float, z: Float } // { x: Float, y: Int, z: Float }
 SomeSet3 = { 1, 2, 3 } <| { 2, 3, 4 } // { 2, 3, 4 }
 SomeSet4 = { x: Int, y: Int } <| { x: Float, z: Float } // { x: Float, z: Float }
 ```
 
-`~` 运算符用来表示集合相对于全集的**补集**：
+> 提示：普通组合在 `<|` 运算符下遵循按键覆写原则。但集合是原子值，所以在 `<|` 运算符下遵循覆写原则，会被整体替代。注意区分 `{ x: Int, y: Int }` 和 `{ x = Int, y = Int }`，前者是组合集合表达式，后者是组合（值是集合）。
+
+对于被 `<~` 运算符扩展的集合，判定 `x in A` 的规则是：
+
+假设 `x` 和 `A` 可以被写为：
 
 ```HAM
-1 in ~LessThan3 // false
+x = ... <| fn2 <| fn1 <| val <| comb <| f1 <| f2 <| ...
+A = ... <~ Fn2 <~ Fn1 <~ Val <~ Comb <~ F1 <~ F2 <~ ...
+```
+
+则 `x in A` 当且仅当：
+
+- `val in Val` 或 `A` 中没有 `Val`
+- `comb in Comb` 或 `A` 中没有 `Comb`
+- 对任意 `Fi`，存在 `fk`，使得 `fk in Fi`
+- 对任意 `Fnj`，存在 `fnl`，使得 `fnl in Fnj`
+
+这可以被总结成以下几点：
+
+- **可多不可少**：`comb` 里的键可以多于 `Comb` 里的键，但不能少于 `Comb` 里的键；`Fn` 和 `F` 可以被多个 `fn` 和 `f` 对应，但每个 `Fn` 和 `F` 至少要有一个对应的 `fn` 和 `f`
+- **前后分开算**：`Fn` 跟 `fn` 对应，`F` 跟 `f` 对应，`Val` 跟 `val` 对应，`Comb` 跟 `comb` 对应，前后不混合
+
+`~` 运算符用来表示集合的**补集**。
+
+`~A` 是**所有与 `A` 不相交的集合**的并集。两个集合是否不相交由神谕协助判定。
+
+```HAM
+1 in ~LessThan3              // false
+1 <| { x = 2 } in LessThan3  // true
 1 <| { x = 2 } in ~LessThan3 // true
 x => x + 1     in ~LessThan3 // true
 ~LessThan3     in ~LessThan3 // true
 ```
 
-`-` 运算符用来表示集合的**差集**：
+> 注意：`~A` 不是严格的集合论补集。`x in ~A` 与 `x in A` 可以同时成立。例如 `1 <| { x = 2 }` 同时属于 `LessThan3`（值部分 `1` 属于 `{1}`）和 `~LessThan3`（组合部分 `{ x = 2 }` 属于 `{ x: Int }`）。因此 `x in ~A` **不意味着** `x notin A`，`notin` 只是 `in` 的否定。
+
+`-` 运算符用来表示集合的**差集**。
+
+与传统上 `A & ~B` 不同的是，HAM 的差集的计算方式是，把 `A` 拆成与 `B` 不相交的集合，然后取它们的并。
 
 ```HAM
 LessThan5 - LessThan3 // { 3, 4 }
@@ -181,8 +214,8 @@ Num subset NumDeltaXY      // false
 | `notin`    | 判断一个表达式是否不属于某个集合     |
 | `\|`       | 两集合的并集                         |
 | `&`        | 两集合的交集                         |
-| `~`        | 集合相对于全集的补集                 |
+| `~`        | 与集合不相交的集合的并集             |
 | `-`        | 两集合的差集                         |
 | `subseteq` | 判断一个集合是否是另一个集合的子集   |
 | `subset`   | 判断一个集合是否是另一个集合的真子集 |
-| `<\|`      | 集合的扩展                           |
+| `<~`       | 集合的扩展                           |
