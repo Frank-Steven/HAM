@@ -34,7 +34,8 @@ myAllSum = 0 <| ((...args) => { cache = sum(args...) } <|
 ```HAM
 myAllSum1
 = myAllSum(1, 2, 3, 4)
-= 0 <| { cache = 10 } <| 10 <| (...argsNew) => myAllSum(10, argsNew...)
+= 0 $ (1, 2, 3, 4) <| ((...args) => ...)(1, 2, 3, 4)
+= {} <| { cache = 10 } <| 10 <| (...argsNew) => myAllSum(10, argsNew...)
 = { cache = 10 } <| 10 <| (...args) => myAllSum(10, args...)
 
 myAllSum1(5, 6)
