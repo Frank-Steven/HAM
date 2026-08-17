@@ -42,7 +42,9 @@ Something 的标准式是指它被化简后的形式。可以被写成：
 
 有了 `Something` 后，HAM 的类型系统就可以被扩展为一个集合系统。
 
-`in` 运算符用来判断一个东西是否**属于**某个集合：
+### 值与集合
+
+`in` 运算符用来判断一个东西是否**可被用作某个集合中的元素**。
 
 ```HAM
 1 in LessThan3                     // true
@@ -56,7 +58,7 @@ comb in { x: Int }                 // true
 
 `in` 运算符的优先级低于 `<|` 运算符。
 
-> 提示：`x in A` 可以理解为，把 `x` 用在任何需要 `A` 中元素的位置都不会有问题、能满足要求。具体规则见 `<~` 运算符的说明。
+> 提示：`x in A` 可以理解为，把 `x` 用在任何需要 `A` 中元素的位置都不会出现未定义行为。具体规则见 `<~` 运算符的说明。
 
 `notin` 运算符是 `in` 运算符的否定，`x notin A` 等价于 `!(x in A)`：
 
@@ -65,6 +67,10 @@ comb in { x: Int }                 // true
 3 notin LessThan3               // true
 2 <| x => x + 1 notin LessThan3 // false
 ```
+
+### 集合与集合
+
+#### 并集与交集
 
 `|` 运算符用来表示集合的**并集**：
 
@@ -79,6 +85,8 @@ Num = Int | Float | Double
 LessThan3 & LessThan5 // { 0, 1, 2 }
 Num & Int // Int
 ```
+
+#### 集体的扩展
 
 `<~` 运算符用来表示集合的**扩展**，集合的扩展规则与其它表达式使用的 `<|` 扩展规则类似：
 
@@ -104,9 +112,10 @@ FiiDeltaNum = (Int -> Int) <~ Num
 注意与 `<|` 运算符的区别，`<~` 运算符是集合的扩展运算符，而 `<|` 运算符是表达式的扩展运算符。集合在表达式中作为值存在，所以会遵循覆写原则：
 
 ```HAM
-SomeSet1 = { 1, 2, 3 } <~ { 2, 3, 4 } // { 2, 3, 4 }
-SomeSet2 = { x: Int, y: Int } <~ { x: Float, z: Float } // { x: Float, y: Int, z: Float }
-SomeSet3 = { 1, 2, 3 } <| { 2, 3, 4 } // { 2, 3, 4 }
+SomeSet1 = { 1, 2, 3 } <~ { 2, 3, 4 }                   // { 2, 3, 4 }
+SomeSet2 = { 1, 2, 3 } <| { 2, 3, 4 }                   // { 2, 3, 4 }
+
+SomeSet3 = { x: Int, y: Int } <~ { x: Float, z: Float } // { x: Float, y: Int, z: Float }
 SomeSet4 = { x: Int, y: Int } <| { x: Float, z: Float } // { x: Float, z: Float }
 ```
 
@@ -133,6 +142,8 @@ A = ... <~ Fn2 <~ Fn1 <~ Val <~ Comb <~ F1 <~ F2 <~ ...
 - **可多不可少**：`comb` 里的键可以多于 `Comb` 里的键，但不能少于 `Comb` 里的键；`Fn` 和 `F` 可以被多个 `fn` 和 `f` 对应，但每个 `Fn` 和 `F` 至少要有一个对应的 `fn` 和 `f`
 - **前后分开算**：`Fn` 跟 `fn` 对应，`F` 跟 `f` 对应，`Val` 跟 `val` 对应，`Comb` 跟 `comb` 对应，前后不混合
 
+#### 补集与差集
+
 `~` 运算符用来表示集合的**补集**。
 
 `~A` 是**所有与 `A` 不相交的集合**的并集。两个集合是否不相交由神谕协助判定。
@@ -156,6 +167,8 @@ LessThan5 - LessThan3 // { 3, 4 }
 Num - Int // Float | Double
 ```
 
+#### 子集关系
+
 `subseteq` 运算符用来判断集合的**子集**关系：
 
 ```HAM
@@ -170,6 +183,54 @@ Num subseteq NumDeltaXY      // false
 LessThan3 subset LessThan3 // false
 LessThan3 subset LessThan5 // true
 Num subset NumDeltaXY      // false
+```
+
+## 集合与类型
+
+HAM 的类型系统是建立在集合系统之上的。可以用 `typeof` 函数来获取一个表达式的类型（即所属的集合）。
+
+> 提示：`in` 运算符还可以理解为“类型检查”，`x in A` 等同于 `typeof(x) subseteq A`。
+
+### 字面量的类型
+
+由于 HAM 没有基本类型（因为没有基本集合），所以字面量的类型就是它自己：
+
+```HAM
+typeof(1)         // { 1 }
+typeof(3.14)      // { 3.14 }
+typeof("abc")     // { "abc" }
+typeof({ x = 1 }) // { { x = 1 } }
+typeof( _ + 1 )   // { x => x + 1 }
+typeof(Int)       // Int
+```
+
+> HAM 格言：`万物即{万物}`
+
+### 键的类型
+
+如果一个键在定义的时候，没有标记它的类型，则它的类型就是它的值的类型：
+
+```HAM
+x = 1,
+y = { x = 1 },
+typeof(x) // { 1 }
+typeof(y) // { { x = 1 } }
+
+inc: Int -> Int = _ + 1,
+z = inc(x), // 这里 x 的类型 { 1 } subseteq Int，所以可以被传入 inc 而不得到 {}
+typeof(z)   // Int 因为 inc 的返回值类型是 Int
+```
+
+有类型标记时，该键会承载标记的类型信息：
+
+```HAM
+x: Int = 1,
+y: { x: Int } = { x = 1 },
+inc: Int -> Int = _ + 1,
+
+typeof(x)   // Int
+typeof(y)   // { x: Int }
+typeof(inc) // Int -> Int
 ```
 
 ## 附录
