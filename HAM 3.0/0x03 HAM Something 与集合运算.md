@@ -20,17 +20,23 @@ HAM 中的所有表达式类型现在你已经全部见过了，在 HAM 中，�
 
 `Something` 是 `Anything` 去掉 `{}` 的集合。Something 表示一个可以被使用的东西，可以参与运算，可以被调用。
 
-Something 都满足以下标准式
+### Something 的稳定性
 
-```HAM
-... [函数] <| [函数] <| [值] <| [组合] <| [函数] <| [函数] ...
-```
+Something 的稳定性是指它是否包含函数，稳定的 Something 一旦被调用就会返回 `{}`，而不稳定的 Something 被调用后可能返回一个新 Something。
 
-其中，我们又将其细分为“稳定”和“不稳定”两种：
+稳定的 Something，也称纯稳定的 Something，只能包含值和组合；纯不稳定的 Something，只能包含函数。Something 里的各元素之间应由 `<|` 运算符连接，遵循覆写原则。
 
-化简后的标准形式中不含函数，则为“稳定”；否则为“不稳定”。
+不稳定的 Something 可以包含值、组合，必须包含函数。
 
-稳定的东西被有参调用后会得到 `{}`。
+### Something 标准式
+
+Something 的标准式是指它被化简后的形式。可以被写成：
+
+纯不稳定的 Something 标准式 = `函数 <| 函数 <| ... <| 函数`。
+
+纯稳定的 Something 标准式 = `组合 <| 值`。
+
+不稳定的 Something 标准式 = `纯稳定的 Something <| 纯不稳定的 Something <| 纯稳定的 Something <| 纯不稳定的 Something <| ...`。
 
 ## 集合的运算
 
