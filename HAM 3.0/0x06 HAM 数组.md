@@ -203,10 +203,10 @@ arr2.contains(2) // true
 | `Array.modify(array, index, value)` | 修改并覆写数组的元素     |
 | `Array.filter(array, predicate)`    | 过滤数组中符合条件的元素 |
 | `Array.length(array)`               | 获取数组的长度           |
-| `Array.concat(...arraies)`          | 拼接多个数组             |
+| `Array.concat(...arrays)`           | 拼接多个数组             |
 | `Array.map(array, f)`               | 每个元素经 `f` 映射      |
-| `Array.flatten(array)`              | 扁平化数组               |
-| `Array.flatMap(array, f)`           | 映射后扁平化             |
+| `Array.flatMap(array, f)`           | 映射后压平一层           |
+| `Array.flatten(array)`              | 把数组的数组压平一层     |
 | `Array.fold(array, init, f)`        | 从左到右折叠             |
 | `Array.take(array, n)`              | 取前 `n` 个元素          |
 | `Array.drop(array, n)`              | 去掉前 `n` 个元素        |

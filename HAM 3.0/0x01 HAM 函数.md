@@ -16,7 +16,7 @@ curriedAdd = (x) => (y) => x + y
 当然，`_` 作为语法糖可以简化单参函数的声明：
 
 ```HAM
-inc = _ + 1 // 等价于 f = (someParamName) => someParamName + 1
+inc = _ + 1 // 等价于 inc = (someParamName) => someParamName + 1
 ```
 
 用 `<-` 以声明一个可以递归调用的函数，在 `<-` 后可以使用正在被定义的键。具体示例见后文。

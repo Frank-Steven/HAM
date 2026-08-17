@@ -84,7 +84,7 @@ comb in { x: Int }                 // true
 
 ```HAM
 LessThan5 = LessThan3 | {3} | {4}, // { 0, 1, 2, 3, 4 }
-Num = Int | Float | Double
+Num = Int | Float
 ```
 
 `&` 运算符用来表示集合的**交集**：
@@ -178,7 +178,7 @@ x => x + 1     in ~LessThan3 // true
 
 ```HAM
 LessThan5 - LessThan3 // { 3, 4 }
-Num - Int // Float | Double
+Num - Int // Float
 ```
 
 #### 子集关系
@@ -212,11 +212,14 @@ HAM 的类型系统是建立在集合系统之上的。可以用 `typeof` 函数
 ```HAM
 typeof(1)         // { 1 }
 typeof(3.14)      // { 3.14 }
+typeof('a')       // { 'a' }
 typeof("abc")     // { "abc" }
 typeof({ x = 1 }) // { { x = 1 } }
 typeof( _ + 1 )   // { x => x + 1 }
 typeof(Int)       // Int
 ```
+
+字符字面量用单引号（如 `'a'`），字符串字面量用双引号（如 `"abc"`）。字符串是字符的数组：`String = Char[]`。
 
 > HAM 格言：`万物即{万物}`
 
@@ -278,6 +281,7 @@ typeof(inc) // Int -> Int
 | `Int`       | 全体整数                   |
 | `Float`     | 全体小数                   |
 | `Char`      | 全体字符                   |
+| `String`    | 全体字符串（即 `Char[]`）  |
 | `Bool`      | `true` 或 `false`          |
 | `Function`  | 全体函数                   |
 | `Set`       | 全体集合                   |

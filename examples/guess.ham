@@ -1,5 +1,5 @@
-{ os } = import('os'),
-{ cl } = import('cl'),
+{ os } = import("os"),
+{ cl } = import("cl"),
 
 game = (os) => {
     os = os.random,
