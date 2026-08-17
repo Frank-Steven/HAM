@@ -86,9 +86,11 @@ argcMod3 <- 0 <| () => 0 <| (x) => 1 <| (x, y) => 2 <| (x, y, z) => argcMod3
 a = argcMod3 $ (),          // 0
 b = argcMod3 $ (m),         // 1
 c = argcMod3 $ (m, n),      // 2
-d = argcMod3 $ (m, n, p),   // 0
+d = argcMod3 $ (m, n, p),   // 0 <| argcMod3
 e = argcMod3 $ (m, n, p, q) // 1
 ```
+
+注意 `d` 的结果不是纯值 `0`。3 个参数恰好完整命中 `(x, y, z) => argcMod3` 分支，返回的是 `argcMod3` 本身，于是结果合并了值面 `0` 与函数面 `argcMod3`，即 `0 <| argcMod3`。当把 `d` 当值用时得到 `0`，当函数调用时与调用 `argcMod3` 等价——例如 `d $ (q)` 与 `argcMod3 $ (q)` 一样，结果是 `1`。
 
 注意到 `e` 的声明中用了 4 个参数给 argcMod3 函数，为什么得到了 1？
 
