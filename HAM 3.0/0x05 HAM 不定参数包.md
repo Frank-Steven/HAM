@@ -2,22 +2,47 @@
 
 HAM 提供两种参数声明的方式，用于接收不定数量的参数。
 
-## `x...` `...x`
+用 `...x` 声明的参数包可以捕获当前结构内的剩余参数：
 
 ```HAM
-f = ...x => g(x...)
+sum <- 0 <| ((head, ...rest) => head + sum(rest...))
+
+sum(1, 2, 3, 4) // 10
 ```
 
-这将捕获当前括号内的剩余参数（如果这个括号恰好不剩参数，则会捕获到 0 个参数）
+用 `....x` 声明的参数包可以捕获将来所有到来的结构内的所有参数：
 
-## `x....` `....x`
 ```HAM
-f = ....x => g(x....)
+allSum = (....args) => sum(args....),
+
+allSum $ (1, 2, 3, 4) // 值的部分为 10
+allSum $ (1, 2, 3, 4) $ (5, 6) // 值的部分为 21，相当于 allSum(1, 2, 3, 4, 5, 6)
+
+allSum1 = allSum $ (1, 2, 3, 4)
+allSum1 $ (5, 6) // 值的部分为 21，相当于 allSum $ (1, 2, 3, 4) $ (5, 6)
 ```
 
-这将捕获这次调用的所有括号的剩余参数。
+可以用 `...` 制作一个丐版的 `allSum` 函数：
 
-## 不定参数包可用于扩展函数功能
+```HAM
+myAllSum = 0 <| ((...args) => { cache = sum(args...) } <|
+                  .cache <| (...argsNew) => myAllSum(.cache, argsNew...))
+```
+
+尝试调用：
+
+```HAM
+myAllSum1
+= myAllSum(1, 2, 3, 4)
+= 0 <| { cache = 10 } <| 10 <| (...argsNew) => myAllSum(10, argsNew...)
+= { cache = 10 } <| 10 <| (...args) => myAllSum(10, args...)
+
+myAllSum1(5, 6)
+= myAllSum(10, 5, 6)
+= { cache = 21 } <| 21 <| (...args) => myAllSum(21, args...)
+```
+
+不定参数包也可用于扩展函数功能：
 
 ```HAM
 getArgc = ...Args => {
