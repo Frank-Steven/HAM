@@ -25,8 +25,9 @@ allSum1 $ (5, 6) // 值的部分为 21，相当于 allSum $ (1, 2, 3, 4) $ (5, 6
 可以用 `...` 制作一个丐版的 `allSum` 函数：
 
 ```HAM
-myAllSum = 0 <| ((...args) => { cache = sum(args...) } <|
-                  .cache <| (...argsNew) => myAllSum(.cache, argsNew...))
+myAllSum <- 0 <|
+            ((...args) => ({ cache = sum(args...) } <| .cache <|
+                           (...argsNew) => myAllSum(.cache, argsNew...)))
 ```
 
 尝试调用：
