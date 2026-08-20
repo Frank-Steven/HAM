@@ -129,8 +129,6 @@ SomeSet4 = { x: Int, y: Int } <| { x: Float, z: Float } // { x: Float, z: Float 
 
 > 提示：普通组合在 `<|` 运算符下遵循按键覆写原则。但集合是原子值，所以在 `<|` 运算符下遵循覆写原则，会被整体替代。注意区分 `{ x: Int, y: Int }` 和 `{ x = Int, y = Int }`，前者是组合集合表达式，后者是组合（值是集合）。
 
-`<~` 按**结构**合并集合，与 `<|` 的整体覆写不同：值面按覆写原则（右侧胜出）；组合集合按键合并——右侧覆盖同名键，左侧其余键保留，右侧新键加入；函数面并置。无键的集合（如列举集合）只有值面，`<~` 与 `<|` 的结果相同（SomeSet1 与 SomeSet2）。
-
 对于被 `<~` 运算符扩展的集合，判定 `x in A` 的规则是：
 
 假设 `x` 和 `A` 可以被写为：
@@ -212,14 +210,13 @@ typeof('a')       // { 'a' }
 typeof("abc")     // { "abc" }
 typeof({ x = 1 }) // { { x = 1 } }
 typeof( _ + 1 )   // { x => x + 1 }
-typeof(Int)       // Int
+typeof(Int)       // { Int }
+typeof(1 <| (x: Int) => x + 1) // { 1 <| (x: Int) => x + 1 }
 ```
 
 字符字面量用单引号（如 `'a'`），字符串字面量用双引号（如 `"abc"`）。字符串是字符的数组：`String = Char[]`。
 
 > HAM 格言：`万物即{万物}`
-
-这对任何字面量都成立，复合值也不例外：`typeof(1 <| { x = 2 })` 就是 `{ 1 <| { x = 2 } }`。
 
 ### 键的类型
 
@@ -233,17 +230,18 @@ typeof(x)   // { 1 }
 typeof(y)   // { { x = 1 } }
 typeof(Num) // { Int | Float }
 
-inc: Int -> Int = _ + 1,
-z = inc(x), // 这里 x 的类型 { 1 } subseteq Int，所以可以被传入 inc 而不得到 {}
-typeof(z)   // Int 因为 inc 的返回值类型是 Int
+inc = (x: Int) -> Int => x + 1,
+z = inc(x),    // 2    因为 x 的类型 { 1 } subseteq Int，所以可以被传入 inc 而不得到 {}
+typeof(z)      // Int  因为 inc 的返回值类型是 Int
+typeof(z <| _) // Int <~ { _ }
 ```
 
-有类型标记时，该键会承载标记的类型信息：
+用 `as` 关键字可以显式标记键的类型：
 
 ```HAM
-x: Int = 1,
-y: { x: Int } = { x = 1 },
-inc: Int -> Int = _ + 1,
+x = 1 as Int,
+y = { x = 1 } as { x: Int },
+inc = _ + 1 as Int -> Int,
 
 typeof(x)   // Int
 typeof(y)   // { x: Int }
