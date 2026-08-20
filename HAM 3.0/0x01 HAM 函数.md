@@ -158,4 +158,8 @@ x + y where { x = 1, y = 2 },  // 3
 { a = 1 } <| let { a = 2 } in .a + a, // 3
 a = 1,
 a where { a = 2 } // 2
+
+comb = { x = 1, y = 2 },
+x + y where comb              // 3
+x + y where comb <| { x = 3 } // 5
 ```
