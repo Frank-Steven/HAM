@@ -31,8 +31,8 @@ HAM 可以有多个入口，也可以有多条 monad 链同时存在，甚至允
 外部接口用 `import(name)` 获取，`import` 返回一个组合，可以用提取语法取出需要的键：
 
 ```HAM
-{ os } = import('os'),   // 操作系统接口
-{ cl } = import('cl')    // Common Lisp 后端
+{ os } = import("os"),   // 操作系统接口
+{ cl } = import("cl")    // Common Lisp 后端
 ```
 
 `os` 提供系统相关的神谕，如 `random`、`input`、`output` 等。调用它们会推进 monad 状态，通常把结果覆写回 `os` 并继续传递：
