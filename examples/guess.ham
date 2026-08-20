@@ -14,7 +14,7 @@ game = (os) => {
         guess(.os.output("Too small.\n"))
     else
         guess(.os.output("Too Big.\n"))
-} <| .guess(.os)
+} <| .guess(.os),
 
 mainCl = cl(game(os))
 
