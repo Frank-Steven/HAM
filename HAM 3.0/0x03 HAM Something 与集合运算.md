@@ -50,30 +50,30 @@ Something 的标准式是指它被化简后的形式。可以被写成：
 
 ### 值与集合
 
-`in` 运算符用来判断一个东西是否**可被用作某个集合中的元素**。
+`is` 运算符用来判断一个东西是否**可被用作某个集合中的元素**。
 
-与数学上 $\in$ 的定义不同，`x in A` 并不要求 `x` 是 `A` 的成员，而是要求把 `x` 当作 `A` 中的元素使用不会出现未定义行为。
+与数学上 $\is$ 的定义不同，`x is A` 并不要求 `x` 是 `A` 的成员，而是要求把 `x` 当作 `A` 中的元素使用不会出现未定义行为。
 
 ```HAM
-1 in LessThan3                     // true
-3 in LessThan3                     // false
-2 <| x => x + 1 in LessThan3       // true
-comb in { x: Int, y: Int }         // true
-comb in { x: Int, y: Float }       // false
-comb in { x: Int, y: Int, z: Int } // false
-comb in { x: Int }                 // true
+1 is LessThan3                     // true
+3 is LessThan3                     // false
+2 <| x => x + 1 is LessThan3       // true
+comb is { x: Int, y: Int }         // true
+comb is { x: Int, y: Float }       // false
+comb is { x: Int, y: Int, z: Int } // false
+comb is { x: Int }                 // true
 ```
 
-注意：空组合在这里是一个例外，因为它属于一切非空集合，所以 `{} in A` 对任意非 `Emtpy` 的 `A` 都成立。
+注意：空组合在这里是一个例外，因为它属于一切非空集合，所以 `{} is A` 对任意非 `Emtpy` 的 `A` 都成立。
 
-`in` 运算符的优先级低于 `<|` 运算符。
+`is` 运算符的优先级低于 `<|` 运算符。
 
-`notin` 运算符是 `in` 运算符的否定，`x notin A` 等价于 `!(x in A)`：
+`isnt` 运算符是 `is` 运算符的否定，`x isnt A` 等价于 `!(x is A)`：
 
 ```HAM
-1 notin LessThan3               // false
-3 notin LessThan3               // true
-2 <| x => x + 1 notin LessThan3 // false
+1 isnt LessThan3               // false
+3 isnt LessThan3               // true
+2 <| x => x + 1 isnt LessThan3 // false
 ```
 
 ### 集合与集合
@@ -100,21 +100,21 @@ Num & Int // Int
 
 ```HAM
 NumDeltaXY = Num <~ { x: Int, y: Int }
-1                                       in NumDeltaXY // false
-{ x = 1, y = 2 }                        in NumDeltaXY // false
-1 <| { x = 1, y = 2 }                   in NumDeltaXY // true
-1 <| { x = 1 }                          in NumDeltaXY // false
-1 <| { x = 1, y = 2, z = 3 } <| x => -x in NumDeltaXY // true
+1                                       is NumDeltaXY // false
+{ x = 1, y = 2 }                        is NumDeltaXY // false
+1 <| { x = 1, y = 2 }                   is NumDeltaXY // true
+1 <| { x = 1 }                          is NumDeltaXY // false
+1 <| { x = 1, y = 2, z = 3 } <| x => -x is NumDeltaXY // true
 
 NumDeltaFii = Num <~ (Int -> Int)
-1                      in NumDeltaFii // false
-(x: Int) => x + 1      in NumDeltaFii // false
-1 <| (x: Int) => x + 1 in NumDeltaFii // true
-1 <| (x: Int) => "abc" in NumDeltaFii // false
+1                      is NumDeltaFii // false
+(x: Int) => x + 1      is NumDeltaFii // false
+1 <| (x: Int) => x + 1 is NumDeltaFii // true
+1 <| (x: Int) => "abc" is NumDeltaFii // false
 
 FiiDeltaNum = (Int -> Int) <~ Num
-1 <| (x: Int) => x + 1 in FiiDeltaNum // false
-(x: Int) => x + 1 <| 1 in FiiDeltaNum // true
+1 <| (x: Int) => x + 1 is FiiDeltaNum // false
+(x: Int) => x + 1 <| 1 is FiiDeltaNum // true
 ```
 
 注意与 `<|` 运算符的区别，`<~` 运算符是集合的扩展运算符，而 `<|` 运算符是表达式的扩展运算符。集合在表达式中作为值存在，所以会遵循覆写原则：
@@ -129,7 +129,7 @@ SomeSet4 = { x: Int, y: Int } <| { x: Float, z: Float } // { x: Float, z: Float 
 
 > 提示：普通组合在 `<|` 运算符下遵循按键覆写原则。但集合是原子值，所以在 `<|` 运算符下遵循覆写原则，会被整体替代。注意区分 `{ x: Int, y: Int }` 和 `{ x = Int, y = Int }`，前者是组合集合表达式，后者是组合（值是集合）。
 
-对于被 `<~` 运算符扩展的集合，判定 `x in A` 的规则是：
+对于被 `<~` 运算符扩展的集合，判定 `x is A` 的规则是：
 
 假设 `x` 和 `A` 可以被写为：
 
@@ -140,14 +140,14 @@ A = ... <~ Fn2 <~ Fn1 <~ Val <~ Comb <~ F1 <~ F2 <~ ...
 
 这是交替标准式的实例：以纯不稳定开头，全部稳定块合并为一段 `val <| comb`，函数块按相对位置分列两侧，任一侧可以为空。
 
-则 `x in A` 当且仅当：
+则 `x is A` 当且仅当：
 
-- `val in Val` 或 `A` 中没有 `Val`
-- `comb in Comb` 或 `A` 中没有 `Comb`
-- 对任意 `Fi`，存在 `fk`，使得 `fk in Fi`
-- 对任意 `Fnj`，存在 `fnl`，使得 `fnl in Fnj`
+- `val is Val` 或 `A` 中没有 `Val`
+- `comb is Comb` 或 `A` 中没有 `Comb`
+- 对任意 `Fi`，存在 `fk`，使得 `fk is Fi`
+- 对任意 `Fnj`，存在 `fnl`，使得 `fnl is Fnj`
 
-其中 `val`、`comb`、`fk`、`fnl` 必须是**存在**的分量：若 `A` 中有 `Val`，而 `x` 的标准式里没有值分量，则判定为 `false`——不能把“没有分量”当作 `val = {}` 来凑数。`{}` 属于一切集合，是指**值可以为** `{}`；分量不存在时则根本没有取值。组合本身不携带值分量，所以 `{ x = 1, y = 2 } in NumDeltaXY` 为 `false`（有 `comb` 无 `val`），`(x: Int) => x + 1 in NumDeltaFii` 为 `false`（无稳定块），而 `1 <| (x: Int) => x + 1 in NumDeltaFii` 为 `true`（有 `val = 1`，`1 in Num`）。
+其中 `val`、`comb`、`fk`、`fnl` 必须是**存在**的分量：若 `A` 中有 `Val`，而 `x` 的标准式里没有值分量，则判定为 `false`——不能把“没有分量”当作 `val = {}` 来凑数。`{}` 属于一切集合，是指**值可以为** `{}`；分量不存在时则根本没有取值。组合本身不携带值分量，所以 `{ x = 1, y = 2 } is NumDeltaXY` 为 `false`（有 `comb` 无 `val`），`(x: Int) => x + 1 is NumDeltaFii` 为 `false`（无稳定块），而 `1 <| (x: Int) => x + 1 is NumDeltaFii` 为 `true`（有 `val = 1`，`1 is Num`）。
 
 这可以被总结成以下几点：
 
@@ -159,14 +159,14 @@ A = ... <~ Fn2 <~ Fn1 <~ Val <~ Comb <~ F1 <~ F2 <~ ...
 `~` 运算符用来表示集合的**补集**。
 
 ```HAM
-1 in ~LessThan3              // false
-1 <| { x = 2 } in LessThan3  // true
-1 <| { x = 2 } in ~LessThan3 // true
-x => x + 1     in ~LessThan3 // true
-~LessThan3     in ~LessThan3 // true
+1 is ~LessThan3              // false
+1 <| { x = 2 } is LessThan3  // true
+1 <| { x = 2 } is ~LessThan3 // true
+x => x + 1     is ~LessThan3 // true
+~LessThan3     is ~LessThan3 // true
 ```
 
-> 注意：`in` 不是严格的集合论属于。`x in ~A` 与 `x in A` 可以同时成立。例如 `1 <| { x = 2 }` 同时属于 `LessThan3`（值部分 `1` 属于 `{1}`）和 `~LessThan3`（组合部分 `{ x = 2 }` 属于 `{ x: Int }`）。因此 `x in ~A` **不意味着** `x notin A`，`notin` 只是 `in` 的否定。
+> 注意：`is` 不是严格的集合论属于。`x is ~A` 与 `x is A` 可以同时成立。例如 `1 <| { x = 2 }` 同时属于 `LessThan3`（值部分 `1` 属于 `{1}`）和 `~LessThan3`（组合部分 `{ x = 2 }` 属于 `{ x: Int }`）。因此 `x is ~A` **不意味着** `x isnt A`，`isnt` 只是 `is` 的否定。
 
 `-` 运算符用来表示集合的**差集**。
 
@@ -197,7 +197,7 @@ Num subset NumDeltaXY      // false
 
 HAM 的类型系统是建立在集合系统之上的。可以用 `typeof` 函数来获取一个表达式的类型（即所属的集合）。
 
-> 提示：`in` 运算符还可以理解为“类型检查”，`x in A` 等同于 `typeof(x) subseteq A`。
+> 提示：`is` 运算符还可以理解为“类型检查”，`x is A` 等同于 `typeof(x) subseteq A`。
 
 ### 字面量的类型
 
@@ -254,8 +254,8 @@ typeof(inc) // Int -> Int
 
 | 运算符     | 说明                                 |
 | ---------- | ------------------------------------ |
-| `in`       | 判断一个表达式是否属于某个集合       |
-| `notin`    | 判断一个表达式是否不属于某个集合     |
+| `is`       | 判断一个表达式是否属于某个集合       |
+| `isnt`     | 判断一个表达式是否不属于某个集合     |
 | `\|`       | 两集合的并集                         |
 | `&`        | 两集合的交集                         |
 | `~`        | 与集合不相交的集合的并集             |
@@ -268,7 +268,7 @@ typeof(inc) // Int -> Int
 
 | 集合名      | 说明                       |
 | ----------- | -------------------------- |
-| `Empty`     | 空集，所有东西都不 `in` 它 |
+| `Empty`     | 空集，所有东西都不 `is` 它 |
 | `Anything`  | 全体表达式                 |
 | `Something` | 全体非 `{}` 表达式         |
 | `Nothing`   | 仅含 `{}` 的集合           |

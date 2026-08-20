@@ -205,7 +205,7 @@ identity = (T: Set) => (x: T) => x
 identity({ 1 })(1)    // 1 注意类型仍为 { 1 }
 identity(Int)(1)      // 1 注意类型变成了 Int
 identity(Float)(3.14) // 3.14
-identity(Int)(3.14)   // {} 因为 3.14 notin Int
+identity(Int)(3.14)   // {} 因为 3.14 isnt Int
 ```
 
 第二种泛型是一个新语法，它更加智能，使用时无需（也不可以）传入类型参数，HAM 会根据传入的参数自动推断类型。这种泛型更像是一种类型集合的限制，用来限制类型退化的范围。
