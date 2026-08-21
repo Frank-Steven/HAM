@@ -236,16 +236,20 @@ typeof(z)      // Int  因为 inc 的返回值类型是 Int
 typeof(z <| _) // Int <~ { _ }
 ```
 
-用 `as` 关键字可以显式标记键的类型：
+用 `as` 关键字可以约束类型：
 
 ```HAM
-x = 1 as Int,
-y = { x = 1 } as { x: Int },
-inc = _ + 1 as Int -> Int,
+x = 1                as Int,
+y = { x = 1 }        as { x: Int },
+z = { x = 1, y = 2 } as { y: Int }, // { y = 2 } 这里面 x 被 as 吃了
+inc = _ + 1          as Int -> Int,
+sth = 1 <| { x = 1 } as Int         // 1         这里面 { x = 1 } 被 as 吃了
 
 typeof(x)   // Int
 typeof(y)   // { x: Int }
+typeof(z)   // { y: Int }
 typeof(inc) // Int -> Int
+typeof(sth) // Int
 ```
 
 ## 附录
