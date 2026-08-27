@@ -209,7 +209,7 @@ typeof(3.14)      // { 3.14 }
 typeof('a')       // { 'a' }
 typeof("abc")     // { "abc" }
 typeof({ x = 1 }) // { { x = 1 } }
-typeof( _ + 1 )   // { x => x + 1 }
+typeof(`_ + 1`)   // { (Int | Float) -> Int | Float }
 typeof(Int)       // { Int }
 typeof(1 <| (x: Int) => x + 1) // { 1 <| (x: Int) => x + 1 }
 ```
@@ -231,9 +231,9 @@ typeof(y)   // { { x = 1 } }
 typeof(Num) // { Int | Float }
 
 inc = (x: Int) -> Int => x + 1,
-z = inc(x),    // 2    因为 x 的类型 { 1 } subseteq Int，所以可以被传入 inc 而不得到 {}
-typeof(z)      // Int  因为 inc 的返回值类型是 Int
-typeof(z <| _) // Int <~ { _ }
+z = inc(x),      // 2    因为 x 的类型 { 1 } subseteq Int，所以可以被传入 inc 而不得到 {}
+typeof(z)        // Int  因为 inc 的返回值类型是 Int
+typeof(z <| `_`) // Int <~ { <T>(T) -> T }
 ```
 
 用 `as` 关键字可以约束类型：
@@ -242,7 +242,7 @@ typeof(z <| _) // Int <~ { _ }
 x = 1                as Int,
 y = { x = 1 }        as { x: Int },
 z = { x = 1, y = 2 } as { y: Int }, // { y = 2 } 这里面 x 被 as 吃了
-inc = _ + 1          as Int -> Int,
+inc = `_ + 1`        as Int -> Int,
 sth = 1 <| { x = 1 } as Int         // 1         这里面 { x = 1 } 被 as 吃了
 
 typeof(x)   // Int

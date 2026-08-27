@@ -64,7 +64,7 @@ Heap = (T: Set) => let {
 } <| Node)
 
 Pair = (T: Set, U: Set) => { first: T, second: U }
-`<=> = `<=> <| (lhs: Pair(Int, Int), rhs: Pair(Int, Int)) => 
+#<=> = #<=> <| (lhs: Pair(Int, Int), rhs: Pair(Int, Int)) => 
   if (lhs.first != rhs.first)
     lhs.first <=> rhs.first
   else
@@ -85,10 +85,10 @@ dijkstra = (graph: Pair(Int, Int)[][], source: Int) -> Int[] => let {
 
   env = {
     dist = #fixedSizeArr(Array.length(graph), infinity as Int)
-           |> Array.modify(_, source, 0),
+           |> `Array.modify(_, source, 0)`,
     visited = #fixedSizeArr(Array.length(graph), false as Bool)
-           |> Array.modify(_, source, true),
-    q = newHeap |> push(_, { first = 0, second = source })
+           |> `Array.modify(_, source, true)`,
+    q = newHeap |> `push(_, { first = 0, second = source })`
         where Heap(Pair(Int, Int))
   } as Env,
 
@@ -99,14 +99,14 @@ dijkstra = (graph: Pair(Int, Int)[][], source: Int) -> Int[] => let {
   update = (cur: Env) -> Env => let {
       d = cur.q.value.first,
       u = cur.q.value.second,
-      q = cur.q |> Heap(Pair(Int, Int)).pop(_),
-      visited = cur.visited |> Array.modify(_, u, true),
+      q = cur.q |> `Heap(Pair(Int, Int)).pop(_)`,
+      visited = cur.visited |> `Array.modify(_, u, true)`,
 
       updateOnce = (cur: Env, v: Int, w: Int) -> Env => (
         cur <| {
           dist = if (dist[u] + w < dist[v])
-            dist |> Array.modify(_, v, dist[u] + w),
-          q = q |> push(_, { first = dist[v], second = v })
+            dist |> `Array.modify(_, v, dist[u] + w)`,
+          q = q |> `push(_, { first = dist[v], second = v })`
             where Heap(Pair(Int, Int)),
         }),
       
@@ -122,7 +122,5 @@ dijkstra = (graph: Pair(Int, Int)[][], source: Int) -> Int[] => let {
                 where { v = x.first, w = x.second }))
     } in cur,
 
-  env = while(env, _.q, update),
+  env = while(env, `_.q`, update),
 } in env.dist
-
-// 视为假：false {} 0 0.0 '\0' "" []

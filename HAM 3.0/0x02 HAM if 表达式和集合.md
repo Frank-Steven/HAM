@@ -5,11 +5,13 @@
 if 表达式可以帮助我们简单地创建分段函数（分支结构），其形式如下：
 
 ```HAM
-a = if (cond) 100            // 100（cond 为 true）/ {}（cond 为 false）
-b = if (cond) 100 else 10    // 100（cond 为 true）/ 10（cond 为 false）
+a = if (cond) 100            // 100（cond 为真）/ {}（cond 为假）
+b = if (cond) 100 else 10    // 100（cond 为真）/ 10（cond 为假）
 ```
 
 if 表达式应该视为一种分段函数的简化写法。作为 `<|` 链的右侧成分时，if 表达式在链被调用时求值，条件与分支中的 `.x` 投影自累积合并。`else` 后可以是任意表达式，包括另一个 if 表达式，由此形成 `else if` 链。
+
+一个表达式被视为假，当且仅当它为 `false`、`{}`、`0`、`0.0`、`'\0'`、`""`、`[]` 其中之一。
 
 ## 集合
 
@@ -38,7 +40,13 @@ inc(someFloat) // {}
 
 ### 集合的表达
 
-除内置集合外，还可以用**集合表达式**来表达高级集合。
+除内置集合外，还可以用**集合表达式**来表达集合。
+
+**列举法**是最简单的表示集合的方法：
+
+```HAM
+LessThan3 = { 0, 1, 2 }
+```
 
 想要表示包含函数的集合，就需要用到**函数集合表达式**。
 
@@ -47,6 +55,18 @@ inc(someFloat) // {}
 one: () -> Int  // 无参时，括号不能省略
 inc: Int -> Int // 单参时，括号可以省略
 add: (Int, Int) -> Int
+```
+
+集合无法包含函数内容，如果试图用列举法表示包含函数的集合，则会丢失函数内容。
+
+列举法表示的函数集合会解析为函数集合表达式，相当于只保留了多个维度上的投影。
+
+```HAM
+oneWithoutType = () => 1,          // () -> {1}
+incWithoutType = (x) => x + 1,     // (Int | Float) -> Int | Float
+addWithoutType = (x, y) => x + y,  // (Int | Float, Int | Float) -> Int | Float
+
+Func = { oneWithoutType, incWithoutType, addWithoutType } // { () -> {1}, <T>(T) -> Int | Float, (Int | Float, Int | Float) -> Int | Float }
 ```
 
 想要表示包含组合的集合，就需要用到**组合集合表达式**：
@@ -62,17 +82,11 @@ comb: { x: Int, y: Int }
 FunctionI2I = Int -> Int
 ```
 
-当然，还可以用**列举法**表示集合：
-
-```HAM
-LessThan3 = { 0, 1, 2 }
-```
-
 也可以用**条件法**表示集合：
 
 ```HAM
-Even = {...| x: Int -> Bool => x % 2 == 0 }
-Odd = {...|_ % 2 == 1 }
+Even = {...| x: Int -> Bool => x % 2 == 0 },
+Odd = {...| `_ % 2 == 1` },
 FirstQuadrant = {...| (e: {x: Num, y: Num}) => e.x > 0 && e.y > 0 }
 ```
 

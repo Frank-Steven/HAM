@@ -60,7 +60,14 @@ arr2[0] // 1
 或使用 `|>` 运算符：
 
 ```HAM
-arr2 |> Array.at(_, 0) // 1
+arr2 |> `Array.at(_, 0)` // 1
+```
+
+搭配 `where` 或 `let in` 使用最佳：
+
+```HAM
+arr2 |> `at(_, 0)` where Array  // 1
+let Array in arr2 |> `at(_, 0)` // 1
 ```
 
 ### 修改元素并覆写
@@ -94,13 +101,13 @@ arr2 | x => x > 1 // [2, 3]
 也可以用 `_` 语法糖来简化单参函数：
 
 ```HAM
-arr2 | _ > 1 // [2, 3]
+arr2 | `_ > 1` // [2, 3]
 ```
 
 还可以用 `|>` 运算符把管道式调用串起来，例如先过滤再映射：
 
 ```HAM
-arr2 |> filter(_, x => x > 1) |> map(_, x => x * 2) where Array // [4, 6]
+arr2 |> `filter(_, `_ > 1`)` |> `map(_, `_ * 2`)` where Array // [4, 6]
 ```
 
 ### 长度
@@ -137,7 +144,7 @@ Array.map(arr2, x => x * 2) // [2, 4, 6]
 如果 `Array.map` 的函数返回数组，可以用 `Array.flatMap` 把结果压平一层，相当于 `Array.map` 后再 `Array.flatten`：
 
 ```HAM
-Array.flatMap(arr2, [_, -_]) // [1, -1, 2, -2, 3, -3]
+Array.flatMap(arr2, `[_, -_]`) // [1, -1, 2, -2, 3, -3]
 ```
 
 `Array.flatten` 可以把数组的数组压平一层：

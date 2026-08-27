@@ -10,7 +10,7 @@ hexagons = (x: Int, y: Int) -> Char[][] =>
 
 main = (os) => os.output(
   hexagons(12, 17)
-  |> fold(_, "", (acc, str) => concat(acc, str, "\n"))
+  |> `fold(_, "", (acc, str) => concat(acc, str, "\n"))`
   where Array
 ),
 
