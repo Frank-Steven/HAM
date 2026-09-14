@@ -201,7 +201,7 @@ HAM 的类型系统是建立在集合系统之上的。可以用 `typeof` 函数
 
 ### 字面量的类型
 
-由于 HAM 没有基本类型（因为没有基本集合），所以字面量的类型就是它自己：
+由于 HAM 没有基本类型（因为没有基本集合），所以字面量的类型就是它自己（注意函数内容的丢失）：
 
 ```HAM
 typeof(1)         // { 1 }
@@ -211,7 +211,6 @@ typeof("abc")     // { "abc" }
 typeof({ x = 1 }) // { { x = 1 } }
 typeof(`_ + 1`)   // { (Int | Float) -> Int | Float }
 typeof(Int)       // { Int }
-typeof(1 <| (x: Int) => x + 1) // { 1 <| (x: Int) => x + 1 }
 ```
 
 字符字面量用单引号（如 `'a'`），字符串字面量用双引号（如 `"abc"`）。字符串是字符的数组：`String = Char[]`。
@@ -233,7 +232,7 @@ typeof(Num) // { Int | Float }
 inc = (x: Int) -> Int => x + 1,
 z = inc(x),      // 2    因为 x 的类型 { 1 } subseteq Int，所以可以被传入 inc 而不得到 {}
 typeof(z)        // Int  因为 inc 的返回值类型是 Int
-typeof(z <| `_`) // Int <~ { <T>(T) -> T }
+typeof(z <| inc) // Int <~ Int -> Int
 ```
 
 用 `as` 关键字可以约束类型：
@@ -250,6 +249,19 @@ typeof(y)   // { x: Int }
 typeof(z)   // { y: Int }
 typeof(inc) // Int -> Int
 typeof(sth) // Int
+```
+
+如果使用了 `<|` 运算符，则它的类型会使用 `<~` 运算符构建：
+
+```HAM
+typeof(1 <| { x = 1 })         // { x: { 1 } } <~ { 1 }
+typeof(1 <| (x: Int) => x + 1) // { 1 } <~ Int -> Int
+typeof(1 <| { x = 2 } <| 2)    // { x: { 2 } } <~ { 2 }
+
+typeof(1 <| (x: Int) => { a = x + 1 } <| .a)             // { 1 } <~ Int -> { a: Int }
+                                                         // 其中 .a 为 {}
+typeof(1 <| (x: Int) => { a = x + 1 } <| (x: Int) => .a) // { 1 } <~ Int -> { a: Int } <~ Int
+                                                         // 其中 .a 是前面函数返回组合中 a = x + 1 的投影
 ```
 
 ## 附录

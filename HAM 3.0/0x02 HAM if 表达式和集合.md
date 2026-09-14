@@ -66,7 +66,7 @@ oneWithoutType = () => 1,          // () -> {1}
 incWithoutType = (x) => x + 1,     // (Int | Float) -> Int | Float
 addWithoutType = (x, y) => x + y,  // (Int | Float, Int | Float) -> Int | Float
 
-Func = { oneWithoutType, incWithoutType, addWithoutType } // { () -> {1}, <T>(T) -> Int | Float, (Int | Float, Int | Float) -> Int | Float }
+Func = { oneWithoutType, incWithoutType, addWithoutType } // { () -> {1}, (Int | Float) -> Int | Float, (Int | Float, Int | Float) -> Int | Float }
 ```
 
 想要表示包含组合的集合，就需要用到**组合集合表达式**：
