@@ -35,7 +35,7 @@ add = (x: Int, y: Int) -> Int => x + y,
 
 ```HAM
 someFloat = 1.0,
-inc(someFloat) // {}
+incresement = inc(someFloat) // {}
 ```
 
 注意，`{}` 本身属于一切集合（`Empty` 除外），所以 `someFloat` 的值 `{}` 依然满足 `Int` 标注。类型不匹配会出现空组合，但不会出现类型错误。
@@ -87,10 +87,12 @@ FunctionI2I = Int -> Int
 也可以用**条件法**表示集合：
 
 ```HAM
-Even = {...| x: Int -> Bool => x % 2 == 0 },
-Odd = {...| `_ % 2 == 1` },
+Even          = {...| (x: Int) -> Bool => x % 2 == 0 },
+Odd           = {...| `_ % 2 == 1` },
 FirstQuadrant = {...| (e: {x: Num, y: Num}) => e.x > 0 && e.y > 0 }
 ```
+
+> 提示：由于运算符的优先级问题，`(x: Int) -> Bool => ...` 与 `x: Int -> Bool => ...` 是不同的。前者表明该函数的参数是一个 Int 类型，返回值是 Bool 类型；后者表明该函数的参数是一个 Int -> Bool 的函数，未标定返回值类型，也写作 `(x: Int -> Bool) => ...`。所以不建议在标定函数参数类型时省略括号。
 
 `...|` 后的函数必须是一个返回 `Bool` 的单参函数，具体而言，该函数属于 `Anything -> Bool`。谓词可以带定义域标注（如 `x: Int => ...`）：对定义域之外的输入，`f(x)` 的结果是 `{}`，不是 `true`，因此不会被判入集合。任何表达式 `x` 属于集合 `{...| f}`，当且仅当 `f(x)` 为 `true`。
 

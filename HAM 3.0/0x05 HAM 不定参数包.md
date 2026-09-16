@@ -48,14 +48,14 @@ myAllSum1(5, 6)
 不定参数包也可用于扩展函数功能：
 
 ```HAM
-getArgc = ...Args => {
-  #curArgc <- 0 <| (arg, ...curArgs) => #curArgc(curArgs...) + 1,
-  argc = #curArgc(Args...)
+getArgc = ...args => {
+  #curArgc <- 0 <| (arg, ...rest) => #curArgc(rest...) + 1,
+  argc = #curArgc(args...)
 },
 
-getAllArgc = ....Args => {
-  #curArgc <- 0 <| (arg, ....curArgs) => #curArgc(curArgs....) + 1,
-  allArgc = #curArgc(Args....)
+getAllArgc = ....args => {
+  #curArgc <- 0 <| (arg, ....rest) => #curArgc(rest....) + 1,
+  allArgc = #curArgc(args....)
 },
 
 f = getArgc <| getAllArgc <| ....args => .argc % 3 + .allArgc % 3
