@@ -79,7 +79,9 @@ comb is { x: Int }                 // true
 
 > 提示：上述代码不是真正的 HAM 代码，因为表达式出现在了组合的顶层，而在真正的 HAM 代码中，表达式应当出现在组合的键值中。
 
-注意：空组合在这里是一个例外，因为它属于一切非空集合，所以 `{} is A` 对任意非 `Empty` 的 `A` 都成立。
+注意：`typeof({})` 是 `Nothing`（仅含 `{}` 的集合），于是 `{} is A` 就是 `Nothing subseteq A`，也就是判断 `{}` 是否属于 `A`。由于空组合属于一切非空集合，这对任意非 `Empty` 的 `A` 都成立。
+
+如果 `A` 不是集合，则 `x is A` 为 `{}`，因为 `A isnt Set` 对于 `is` 来说是非法的。
 
 `is` 运算符的优先级低于 `<|` 运算符。
 
@@ -89,6 +91,59 @@ comb is { x: Int }                 // true
 1 isnt LessThan3               // false
 3 isnt LessThan3               // true
 2 <| x => x + 1 isnt LessThan3 // false
+```
+
+### 相等
+
+`==` 运算符用来判断两个东西的**值**是否相等，`!=` 是它的否定。
+
+它只作用在值面上，组合面与函数面不参与。这是因为它的定义域仅限于值面：
+
+```HAM
+1 == 1                           // true
+1 == 2                           // false
+1 <| { x = 1 } == 1              // true，只看值面
+1 <| { x = 1 } == 1 <| { y = 2 } // true，组合面不同也不影响
+```
+
+集合也是值，所以集合也可以判定相等：
+
+```HAM
+{ 0, 1, 2 } == { 2, 0, 1 } // true
+Int == Int                 // true
+Int == Float               // false
+Bool == { true, false }    // true
+```
+
+然而，有一些特殊的集合无法判定相等：
+
+```HAM
+A = {...| (x: Int) => isPrimeA(x) },
+B = {...| (x: Int) => isPrimeB(x) },
+A == B // {}
+```
+
+`{}` 没有值面，但两个 `{}` 相等：
+
+```HAM
+{} == {} // true
+{} == 1  // {}
+```
+
+除此之外，没有值面的东西不在 `==` 的定义域里，结果是 `{}`：
+
+```HAM
+{ x = 1 } == { x = 1 } // {}
+(x => x) == (x => x)   // {}
+```
+
+函数不是值，而组合的相等需要递归到它里面的值才能判定，所以 `==` 不处理它们。
+
+`==` 与 `is` 是两个独立的判定，一个看值相不相等，一个看有没有可用的成分：
+
+```HAM
+1 <| { x = 1 } == 2     // false，值面是 1
+1 <| { x = 1 } is { 1 } // true，成分里有 { 1 }
 ```
 
 ### 集合与集合
@@ -146,7 +201,7 @@ SomeSet4 = { x: Int, y: Int } <| { x: Float, z: Float } // { x: Float, z: Float 
 
 #### 补集与差集
 
-`~` 运算符用来表示集合的**补集**。
+`~` 运算符用来表示集合的**补集**。补集作用在成分上，`~A` 就是 `Anything - A`：一个东西只要有一个成分不属于 `A`，它就属于 `~A`。
 
 ```HAM
 1 is ~LessThan3              // false
@@ -157,6 +212,8 @@ x => x + 1     is ~LessThan3 // true
 ```
 
 > 注意：`is` 不是严格的集合论属于。`x is ~A` 与 `x is A` 可以同时成立。例如 `1 <| { x = 2 }` 同时属于 `LessThan3`（值部分 `1` 属于 `{1}`）和 `~LessThan3`（组合部分 `{ x = 2 }` 属于 `{ x: Int }`）。因此 `x is ~A` **不意味着** `x isnt A`，`isnt` 只是 `is` 的否定。
+
+> 提示：这并不影响 `A & ~A` 是空集。`x is A & ~A` 要求**同一个成分**同时属于两边，而一个成分不会既属于 `A` 又不属于 `A`，所以它恒为假。
 
 `-` 运算符用来表示集合的**差集**。
 
@@ -175,6 +232,20 @@ LessThan3 subseteq LessThan5 // true
 Num subseteq NumDeltaXY      // false
 ```
 
+`subseteq` 是**成分级**的，与 `is` 用的是同一个判定。一个被 `<~` 连接起来的集合，它的每一段都是一个**成分**，例如 `NumDeltaXY = Num <~ { x: Int, y: Int }` 的成分是 `Num` 与 `{ x: Int, y: Int }`。于是：
+
+```HAM
+X subseteq Y  当且仅当  X 自身或它的某个成分 C 满足 C subseteq Y
+```
+
+所以只要某个成分是另一个集合的子集，整个集合就是另一个集合的子集：
+
+```HAM
+NumDeltaXY subseteq Num // true，因为成分里的 Num subseteq Num
+```
+
+> 提示：`Num subseteq NumDeltaXY` 为假，是因为反过来不成立：`Num` 是原子集合，没有成分可分，而它的数值不属于需要一个组合面的 `NumDeltaXY`。
+
 `subset` 运算符用来判断集合的**真子集**关系：
 
 ```HAM
@@ -183,21 +254,32 @@ LessThan3 subset LessThan5 // true
 Num subset NumDeltaXY      // false
 ```
 
+#### 复合集合的判定
+
+`|`、`&`、`-`、`~` 的结果也可以被 `is` 判定，但只有并集能写成布尔组合：
+
+| 写法            | 判定                                                                |
+| --------------- | ------------------------------------------------------------------- |
+| `x is A \| B`   | `x is A \|\| x is B`                                                |
+| `x is A & B`    | 存在**同一个**成分 `C`，使 `C subseteq A` 且 `C subseteq B`         |
+| `x is A - B`    | 存在**同一个**成分 `C`，使 `C subseteq A` 且 `C` 不 `subseteq B`    |
+| `x is ~A`       | 存在**同一个**成分 `C`，使 `C` 不 `subseteq A`                      |
+
+`1 <| { x = 2 }` 是最小的例子：它 `is LessThan3`（值部分），也 `is ~LessThan3`（组合部分），但 `is LessThan3 & ~LessThan3` 为假——两次判定用的是不同的成分，而 `&` 要求同一个成分同时落在两边。
+
 ## 集合与类型
 
 HAM 的类型系统是建立在集合系统之上的。可以用 `typeof` 函数来获取一个表达式的类型（即所属的集合）。
 
 ### 类型判定
 
-HAM 中的 `is` 运算符可以用于类型检查。`x is A` 等同于 `typeof(x) subseteq A`。
+HAM 中的 `is` 运算符可以用于类型检查。`x is A` 等同于 `typeof(x) subseteq A`，其中的 `subseteq` 是成分级的。
 
-对于被 `<~` 运算符扩展的集合，判定 `x is A` 的**规则**是：
-
-假设 `x` 和 `A` 已被化简为：
+对原子集合（`Int`、`{ 1 }`、`{ x: Int }` 等），`typeof(x) subseteq A` 就是普通的包含；对 `<~` 链，它可以展开成逐面的形式。假设 `x` 和 `A` 已被化简为：
 
 ```HAM
 x = comb <| val <| f_1 <| f_2 <| ... <| f_n
-A = Comb <~ Val <~ F_1 <~ F_2 <~ ... <| F_m
+A = Comb <~ Val <~ F_1 <~ F_2 <~ ... <~ F_m
 ```
 
 则 `x is A` 当且仅当：
@@ -224,6 +306,7 @@ typeof("abc")     // { "abc" }
 typeof({ x = 1 }) // { { x = 1 } }
 typeof(`_ + 1`)   // { (Int | Float) -> Int | Float }
 typeof(Int)       // { Int }
+typeof({})        // Nothing
 ```
 
 字符字面量用单引号（如 `'a'`），字符串字面量用双引号（如 `"abc"`）。字符串是字符的数组：`String = Char[]`。
@@ -287,7 +370,7 @@ typeof(1 <| (x: Int) => { a = x + 1 } <| (x: Int) => .a) // { 1 } <~ Int -> { a:
 | `isnt`     | 判断一个表达式是否不属于某个集合     |
 | `\|`       | 两集合的并集                         |
 | `&`        | 两集合的交集                         |
-| `~`        | 与集合不相交的集合的并集             |
+| `~`        | `Anything - A`，即集合的补集         |
 | `-`        | 两集合的差集                         |
 | `subseteq` | 判断一个集合是否是另一个集合的子集   |
 | `subset`   | 判断一个集合是否是另一个集合的真子集 |

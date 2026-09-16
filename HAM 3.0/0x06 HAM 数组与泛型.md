@@ -193,6 +193,8 @@ Array.contains(arr2, 2) // true
 
 `Array.indexOf` 找不到时返回 `{}`。
 
+> 提示：由于数组以 0 为下标，所以在使用 `Array.indexOf` 当作包含判定时，应当判断返回值是否为 `{}`，而不是直接判断是否为 `true`。
+
 ## 泛型
 
 泛型在 HAM 中有两种实现方式。
